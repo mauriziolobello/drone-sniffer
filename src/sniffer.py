@@ -1,6 +1,7 @@
 import os
 import sys
 from scapy.all import sniff, get_if_list, conf
+from src.parser import parse_payload
 
 def get_interfaces():
     """Rileva in modo multipiattaforma le interfacce di rete supportate da scapy."""
@@ -8,8 +9,11 @@ def get_interfaces():
 
 def packet_callback(packet):
     """Callback di base per la visualizzazione a CLI dei pacchetti in arrivo."""
-    # TODO: Invocare il modulo parser.py qui per analizzare payload specifici
-    print(packet.summary())
+    parsed_info = parse_payload(packet)
+    if parsed_info:
+        print(f"Payload estrato -> {parsed_info}")
+    else:
+        print(packet.summary())
 
 def start_sniffing(interface, bpf_filter="", count=0):
     """
