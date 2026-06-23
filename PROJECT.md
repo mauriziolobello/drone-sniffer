@@ -48,3 +48,20 @@ Creazione e trasmissione degli impulsi sintetici.
 1. **Costruzione pacchetti (Forging)**: Modellazione del frame `IP(dst=...) / UDP(dport=...) / Raw(load=...)`.
 2. **Injector routines**: Sviluppo funzioni ad alto livello come `takeoff()`, `land()`.
 3. **Gestione del Keep-Alive**: Implementazione thread secondario volto all'invio dei pacchetti fittizi/heartbeat costanti necessari ai droni per impedire l'auto-landing d'emergenza, qualora il protocollo testato lo richieda.
+
+## Architettura e Profili Multi-Drone
+Il progetto è basato su un'architettura a **profili** (`src/profiles/`) in modo da consentire di estendere facilmente il software a più droni e protocolli (es. `sanrock_u52.py`).
+Ogni profilo definisce in modo isolato: l'IP target, le porte operative, l'eventuale logica di parsing personalizzata e la libreria dei payload noti (esadecimali).
+
+### Workflow Operativo di Reverse Engineering (Approccio sul Campo)
+Per aggiungere comandi a un drone sconosciuto o testarne uno nuovo, eseguire la seguente prassi operativa:
+
+1. **Connessione in Parallelo**: Collegare sia lo smartphone (utilizzando l'app ufficiale per il pilotaggio) sia il PC (con lo Sniffer) alla rete/hotspot Wi-Fi generato dal drone.
+2. **Setup Sniffer / Wireshark**: Avviare lo sniffer (o mettersi in ascolto via Wireshark) associandolo all'interfaccia Wi-Fi. Impostare fin da subito dei filtri BPF (es. `udp port 7080`) per restringere il passaggio di pacchetti al solo canale di comando.
+   *Esempio da CLI*: 
+   ```bash
+   python main.py --interface "Wi-Fi" --filter "udp port 7080"
+   ```
+3. **Isolamento dell'Evento**: Dal telefono, premere fisicamente uno e un solo comando sull'app (es. fare tap sul decollo o variare la manetta in avanti).
+4. **Cattura e Interpretazione a video**: Leggere dal terminale/Wireshark il traffico generato. Isolare l'ultimo payload esadecimale intercettato sul livello Raw/Data.
+5. **Mappatura nel Profilo**: Trascrivere hardcoded quei byte all'interno del profilo Python (es. in `get_predefined_command("takeoff")`), certificando a che comando corrisponde quel treno di byte. Ripetere dal punto 3.
