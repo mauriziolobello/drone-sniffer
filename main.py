@@ -3,7 +3,7 @@ import sys
 from src.sniffer import get_interfaces, start_sniffing
 
 def main():
-    parser = argparse.ArgumentParser(description="Sanrock U52 Packet Sniffer & Injector")
+    parser = argparse.ArgumentParser(description="Drone Packet Sniffer & Injector")
     parser.add_argument("--list-interfaces", action="store_true", help="Elenca le interfacce di rete disponibili")
     parser.add_argument("--interface", type=str, help="L'interfaccia di rete su cui mettersi in ascolto")
     parser.add_argument("--filter", type=str, default="", help="Filtro BPF opzionale (es. 'udp')")

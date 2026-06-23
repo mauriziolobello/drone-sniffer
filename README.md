@@ -1,6 +1,6 @@
-# Sanrock U52 Drone Packet Sniffer & Injector
+# Drone Packet Sniffer & Injector
 
-Un packet sniffer e injector cross-platform (Windows, Linux, macOS) scritto in Python per catturare, analizzare e replicare il protocollo di controllo del drone Sanrock U52.
+Un packet sniffer e injector cross-platform (Windows, Linux, macOS) scritto in Python per catturare, analizzare e replicare i protocolli di controllo di vari droni (tra cui il Sanrock U52).
 
 ## Struttura del Progetto
 - `src/sniffer.py`: Modulo per la rilevazione delle interfacce e la cattura asincrona.
