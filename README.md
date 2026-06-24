@@ -1,18 +1,54 @@
 # Drone Packet Sniffer & Injector
 
-Un packet sniffer e injector cross-platform (Windows, Linux, macOS) scritto in Python per catturare, analizzare e replicare i protocolli di controllo di vari droni (tra cui il Sanrock U52).
+A cross-platform (Windows, Linux, macOS) Python packet sniffer and injector for capturing,
+analysing, and replaying the control protocols of various drones (including the Sanrock U52).
 
-## Struttura del Progetto
-- `src/sniffer.py`: Modulo per la rilevazione delle interfacce e la cattura asincrona.
-- `src/parser.py`: Modulo per il reverse engineering dei payload esadecimali estratti dai pacchetti.
-- `src/injector.py`: Modulo per fondere frame di rete e inoltrare i comandi (spoofing) al drone.
-- `main.py`: Punto di ingresso dell'applicazione CLI.
+## Project Structure
+- `src/sniffer.py`: Interface detection and asynchronous packet capture.
+- `src/parser.py`: Reverse engineering of hex payloads extracted from packets.
+- `src/injector.py`: Frame crafting and command forwarding (spoofing) to the drone.
+- `main.py`: CLI entry point.
 
-## Prerequisiti
-- **Windows**: Installare [Npcap](https://npcap.com/) (assicurarsi di selezionare "Install Npcap in WinPcap API-compatible Mode" e le opzioni per il supporto raw 802.11 se richieste).
-- **Linux/macOS**: Assicurarsi di eseguire gli script con privilegi di root (`sudo`).
+## Prerequisites
+- **Windows**: Install [Npcap](https://npcap.com/) (make sure to select
+  "Install Npcap in WinPcap API-compatible Mode" and the raw 802.11 support options if needed).
+- **Linux/macOS**: Run scripts with root privileges (`sudo`).
 
-Installare le dipendenze Python:
+Install Python dependencies:
 ```bash
 pip install -r requirements.txt
 ```
+
+## First Capture (Quick Start)
+
+### Scenario A — Drone as Access Point (recommended on Windows)
+The drone creates its own Wi-Fi network. Both the PC and the smartphone connect to that network,
+allowing the PC to intercept UDP traffic between the official app and the drone.
+
+**1. Connect the PC to the drone's Wi-Fi**
+Find the drone's network in the Windows Wi-Fi list and connect (usually no password or a fixed one).
+Do not use your home network.
+
+**2. Discover the interface name**
+```bash
+python main.py --list-interfaces
+```
+Look for the name matching your Wi-Fi adapter (typically `Wi-Fi` on Windows).
+
+**3. Start a broad capture to explore the traffic**
+```bash
+python main.py --interface "Wi-Fi"
+```
+Open the official app on the phone and press **one single command** (e.g. takeoff).
+Observe in the console the UDP source/destination ports and the length of the Raw payloads shown.
+
+**4. Restart with a targeted filter**
+Once you have identified the port (e.g. `7080`), reduce noise:
+```bash
+python main.py --interface "Wi-Fi" --filter "udp port 7080"
+```
+Press one command at a time in the app and note the hex payload displayed.
+That payload is the raw command to map inside the drone's profile.
+
+> **Note:** for a parallel visual analysis, launch Wireshark on the same interface
+> with the same BPF filter.

@@ -1,18 +1,24 @@
+import importlib
 from src.profiles import sanrock_u52
+
+def get_profile(profile_name):
+    """Dynamically load the profile module."""
+    try:
+        return importlib.import_module(f"src.profiles.{profile_name}")
+    except ImportError:
+        return None
 
 def parse_payload(packet, profile_name="sanrock_u52"):
     """
-    Isola il payload raw dal pacchetto.
-    L'implementazione finale dependerà dall'analisi del protocollo.
-    Se richiamata per un profilo noto, formatta l'output.
+    Isolate the raw payload from the packet and delegate parsing to the matching profile.
+    Profile selection is dynamic via get_profile.
     """
     if packet.haslayer("Raw"):
-        # Estraiamo i byte grezzi
         raw_data = packet.getlayer("Raw").load
-        
-        # Delegazione al profilo per parser specifico
-        if profile_name == "sanrock_u52":
-            return sanrock_u52.parse(raw_data)
-            
-        return f"[Byte Raw Non Mappati]: {raw_data.hex(' ')}"
+
+        profile = get_profile(profile_name)
+        if profile and hasattr(profile, 'parse'):
+            return profile.parse(raw_data)
+
+        return f"[Unmapped Raw Bytes]: {raw_data.hex(' ')}"
     return None
