@@ -77,28 +77,23 @@ logic, and the library of known payloads (hexadecimal).
 | `src/sniffer.py` | Interface enumeration + async `sniff()` with callback | ✅ Working |
 | `src/parser.py` | Extracts `Raw` layer and delegates to profile | ✅ Working (hardcoded profile) |
 | `src/profiles/sanrock_u52.py` | Network constants + `parse()` + known command library | 🟡 Only `takeoff` mapped |
-| `src/injector.py` | Spoofing packet construction and sending | 🔴 `craft_command()` is a stub (`pass`) |
+| `src/injector.py` | Spoofing packet construction and sending | ✅ Working (`craft_command` & keep-alive) |
 | `src/__init__.py`, `src/profiles/__init__.py` | Package initialisation | ✅ |
 
 ---
 
 ## Open Gaps
 
-1. **Incomplete injector** — `craft_command()` is a stub: the `IP(dst=...) / UDP(dport=...) / Raw(load=...)` logic is commented out. No CLI path to send commands.
-2. **Hardcoded profile** — `parse_payload()` has `profile_name="sanrock_u52"` hardcoded. The `--profile` / `--drone` CLI option is missing.
-3. **No checksum** — CRC8/CRC16 validation (Phase 4.3) is planned but not implemented. Without a correct checksum, injected packets risk being dropped by the drone.
-4. **No keep-alive** — Many drones land if they stop receiving heartbeats (Phase 5.3). Not implemented.
-5. **No `.pcap` logging** — Planned in Phase 2.4. Not implemented (`.pcap` is already in `.gitignore`).
-6. **Zero tests** — No `tests/` folder. Parsing and checksums are byte-deterministic → ideal for TDD with `pytest` without physical hardware.
+1. **No checksum** — CRC8/CRC16 validation (Phase 4.3) is planned but not implemented. Without a correct checksum, injected packets risk being dropped by the drone.
+2. **Zero tests** — No `tests/` folder. Parsing and checksums are byte-deterministic → ideal for TDD with `pytest` without physical hardware.
 
 ---
 
 ## Next Steps (by priority)
 
-- **A — Complete the injector** (`craft_command` + CLI command `--send <action>`): makes the project work end-to-end.
-- **B — Profile selection from CLI** + richer `parse()` (split header/payload/checksum instead of flat hex): speeds up field reverse engineering.
-- **C — `.pcap` logging** (Phase 2.4): essential for deferred analysis in Wireshark.
-- **Cross-cutting — Tests** (`pytest`) starting from parser/checksum: byte-deterministic, testable without a physical drone.
+- **A — Checksum Validation**: Implement CRC8/CRC16 calculation in the profile to ensure injected packets are accepted.
+- **B — Tests (`pytest`)**: Write deterministic tests for the parser and checksum logic.
+- **C — Richer parsing**: Split header/payload/checksum instead of printing flat hex to speed up reverse engineering.
 
 ---
 

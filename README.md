@@ -12,9 +12,14 @@ analysing, and replaying the control protocols of various drones (including the 
 ## Prerequisites
 - **Windows**: Install [Npcap](https://npcap.com/) (make sure to select
   "Install Npcap in WinPcap API-compatible Mode" and the raw 802.11 support options if needed).
-- **Linux/macOS**: Run scripts with root privileges (`sudo`).
+- **Linux**: You need root privileges to sniff/inject (use `sudo python3 main.py ...`).
+  Install the requirements via system package manager or create a `venv`:
+  ```bash
+  sudo apt update
+  sudo apt install python3-scapy python3-colorama python3-pytest
+  ```
 
-Install Python dependencies:
+Install Python dependencies (if on Windows or using venv):
 ```bash
 pip install -r requirements.txt
 ```
