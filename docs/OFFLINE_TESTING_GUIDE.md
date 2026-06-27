@@ -20,21 +20,30 @@ Il tuo obiettivo primario è **registrare** cosa si dicono l'app ufficiale e il 
 
 4. **Operazione sul campo**: Dal telefono premi UN SOLO comando (es. decollo). Aspetta 5 secondi. Premi un altro comando (es. atterraggio). 
 
----
+## 2. Risolvere il problema dei pacchetti UDP invisibili
 
-## 2. Casistica: Nessun pacchetto a schermo
+Se, come successo nella "sessione1", il file `.pcap` cattura solo pacchetti ARP e DNS ma **nessun pacchetto UDP sulla porta 7080**, è perché la tua scheda Wi-Fi sta ignorando il traffico unicast diretto al drone.
+Hai due opzioni per risolvere:
 
-Se non vedi scorrere nulla a terminale mentre premi i tasti sull'app, significa che l'IP del drone o la porta non sono quelli standard (`192.168.1.1:7080`).
+### Opzione A: Monitor Mode (Consigliata)
+Non serve essere connessi al Wi-Fi del drone. Basta installare la suite aircrack e mettere la scheda in ascolto passivo.
+1. Installa i tool necessari (mentre sei ancora online): `sudo apt install aircrack-ng`
+2. Metti la scheda in monitor mode: `sudo airmon-ng start wlp2s0`
+3. Lancia lo sniffer sulla nuova interfaccia (di solito si chiama `wlp2s0mon` o `mon0`):
+   ```bash
+   sudo venv/bin/python main.py --interface wlp2s0mon --pcap sessione2.pcap
+   ```
+4. Alla fine dei test, rimetti la scheda in modalità normale per riavere internet: `sudo airmon-ng stop wlp2s0mon`
 
-### Workaround: Trovare i veri parametri
-Interrompi lo script (`Ctrl+C`) e lancia un raw dump con tcpdump per guardare il traffico UDP grezzo:
-```bash
-sudo tcpdump -i wlp2s0 -n udp
-```
-Ora premi i comandi sull'app del cellulare. Vedrai righe simili a:
-`192.168.x.x.12345 > 192.168.y.y.7080: UDP, length 14`
-Appuntati l'IP di destinazione e la porta. Quando tornerai online, modificheremo `DEFAULT_DRONE_IP` e `DEFAULT_DRONE_PORT` nel file `src/profiles/sanrock_u52.py`.
-
+### Opzione B: ARP Spoofing (Se la Monitor Mode non funziona)
+Se la tua scheda Wi-Fi non supporta la monitor mode, mantieni la connessione normale al drone e lancia un attacco Man-In-The-Middle.
+1. Installa dsniff (mentre sei online): `sudo apt install dsniff`
+2. Esegui in una finestra del terminale separata:
+   ```bash
+   sudo arpspoof -i wlp2s0 -t 192.168.0.1 192.168.0.3
+   ```
+   *(Sostituisci gli IP con quelli esatti del Drone e del Telefono)*
+3. Lancia normalmente `main.py` nell'altra finestra.
 ---
 
 ## 3. Casistica: I pacchetti appaiono ma c'è scritto "(CRC FAIL)"
